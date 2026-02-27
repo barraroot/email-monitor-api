@@ -1,0 +1,1542 @@
+{
+    "openapi": "3.0.0",
+    "info": {
+        "title": "Mail Monitor API",
+        "description": "API for Exim/Dovecot monitoring and metrics.",
+        "version": "1.0.0"
+    },
+    "servers": [
+        {
+            "url": "/",
+            "description": "Current host"
+        }
+    ],
+    "paths": {
+        "/api/v1/auth/register": {
+            "post": {
+                "tags": [
+                    "Auth"
+                ],
+                "summary": "Register a new user",
+                "operationId": "7ca6fc7989202054d29707fef91a2d4a",
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/RegisterRequest"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "201": {
+                        "description": "Created",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/AuthRegisterResponse"
+                                }
+                            }
+                        }
+                    },
+                    "422": {
+                        "description": "Validation error",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ValidationError"
+                                }
+                            }
+                        }
+                    }
+                },
+                "security": []
+            }
+        },
+        "/api/v1/auth/token": {
+            "post": {
+                "tags": [
+                    "Auth"
+                ],
+                "summary": "Login and issue token",
+                "operationId": "a80f60d957dabb031fa22b5915096212",
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/LoginRequest"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/AuthLoginResponse"
+                                }
+                            }
+                        }
+                    },
+                    "422": {
+                        "description": "Validation error",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ValidationError"
+                                }
+                            }
+                        }
+                    }
+                },
+                "security": []
+            }
+        },
+        "/api/v1/auth/logout": {
+            "post": {
+                "tags": [
+                    "Auth"
+                ],
+                "summary": "Revoke current token",
+                "operationId": "3a27a9e02ceb521eb3f98c8d2394aef9",
+                "responses": {
+                    "204": {
+                        "description": "No content"
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ErrorResponse"
+                                }
+                            }
+                        }
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
+        "/api/v1/auth/events": {
+            "get": {
+                "tags": [
+                    "Auth Events"
+                ],
+                "summary": "List auth events",
+                "operationId": "ba7efc58d3fbd10483afc75769aed403",
+                "parameters": [
+                    {
+                        "name": "start_at",
+                        "in": "query",
+                        "schema": {
+                            "type": "string",
+                            "format": "date-time"
+                        }
+                    },
+                    {
+                        "name": "end_at",
+                        "in": "query",
+                        "schema": {
+                            "type": "string",
+                            "format": "date-time"
+                        }
+                    },
+                    {
+                        "name": "domain",
+                        "in": "query",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    {
+                        "name": "whm_account",
+                        "in": "query",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    {
+                        "name": "proto",
+                        "in": "query",
+                        "schema": {
+                            "type": "string",
+                            "enum": [
+                                "imap",
+                                "pop3",
+                                "smtp"
+                            ]
+                        }
+                    },
+                    {
+                        "name": "auth_result",
+                        "in": "query",
+                        "schema": {
+                            "type": "string",
+                            "enum": [
+                                "success",
+                                "fail"
+                            ]
+                        }
+                    },
+                    {
+                        "name": "user_email",
+                        "in": "query",
+                        "schema": {
+                            "type": "string",
+                            "format": "email"
+                        }
+                    },
+                    {
+                        "name": "ip",
+                        "in": "query",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    {
+                        "name": "per_page",
+                        "in": "query",
+                        "schema": {
+                            "type": "integer",
+                            "maximum": 200
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/PaginatedAuthEvents"
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ErrorResponse"
+                                }
+                            }
+                        }
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
+        "/api/v1/health": {
+            "get": {
+                "tags": [
+                    "Health"
+                ],
+                "summary": "Health check",
+                "operationId": "cd06246cafed7c9986bce13ec73569da",
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/HealthResponse"
+                                }
+                            }
+                        }
+                    }
+                },
+                "security": []
+            }
+        },
+        "/api/v1/ingest/events": {
+            "post": {
+                "tags": [
+                    "Ingest"
+                ],
+                "summary": "Ingest mail and auth events",
+                "operationId": "40dd38cf34627501be9d319318b3f3a2",
+                "parameters": [
+                    {
+                        "name": "X-Ingest-Secret",
+                        "in": "header",
+                        "required": true,
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                ],
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/IngestEventsRequest"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "201": {
+                        "description": "Created",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/IngestResult"
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ErrorResponse"
+                                }
+                            }
+                        }
+                    }
+                },
+                "security": []
+            }
+        },
+        "/api/v1/mail/events": {
+            "get": {
+                "tags": [
+                    "Mail Events"
+                ],
+                "summary": "List mail events",
+                "operationId": "896deb3056bdc8a5068c3166df6d2d7c",
+                "parameters": [
+                    {
+                        "name": "start_at",
+                        "in": "query",
+                        "schema": {
+                            "type": "string",
+                            "format": "date-time"
+                        }
+                    },
+                    {
+                        "name": "end_at",
+                        "in": "query",
+                        "schema": {
+                            "type": "string",
+                            "format": "date-time"
+                        }
+                    },
+                    {
+                        "name": "domain",
+                        "in": "query",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    {
+                        "name": "whm_account",
+                        "in": "query",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    {
+                        "name": "direction",
+                        "in": "query",
+                        "schema": {
+                            "type": "string",
+                            "enum": [
+                                "inbound",
+                                "outbound",
+                                "local"
+                            ]
+                        }
+                    },
+                    {
+                        "name": "event_type",
+                        "in": "query",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    {
+                        "name": "status",
+                        "in": "query",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    {
+                        "name": "error_category",
+                        "in": "query",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    {
+                        "name": "sender",
+                        "in": "query",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    {
+                        "name": "recipient",
+                        "in": "query",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    {
+                        "name": "per_page",
+                        "in": "query",
+                        "schema": {
+                            "type": "integer",
+                            "maximum": 200
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/PaginatedMailEvents"
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ErrorResponse"
+                                }
+                            }
+                        }
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
+        "/api/v1/mailboxes": {
+            "get": {
+                "tags": [
+                    "Mailboxes"
+                ],
+                "summary": "List mailboxes",
+                "operationId": "148f144addd98cdce212d1976ef62bb3",
+                "parameters": [
+                    {
+                        "name": "per_page",
+                        "in": "query",
+                        "schema": {
+                            "type": "integer",
+                            "maximum": 200
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/PaginatedMailboxes"
+                                }
+                            }
+                        }
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            },
+            "post": {
+                "tags": [
+                    "Mailboxes"
+                ],
+                "summary": "Create mailbox",
+                "operationId": "cb674864ec34a43bf00d39292a7292b2",
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/MailboxStoreRequest"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Mailbox"
+                                }
+                            }
+                        }
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
+        "/api/v1/mailboxes/{mailbox}": {
+            "patch": {
+                "tags": [
+                    "Mailboxes"
+                ],
+                "summary": "Update mailbox",
+                "operationId": "2310117a8c531dd308c5edc038f70b8d",
+                "parameters": [
+                    {
+                        "name": "mailbox",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/MailboxUpdateRequest"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Mailbox"
+                                }
+                            }
+                        }
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
+        "/api/v1/metrics/overview": {
+            "get": {
+                "tags": [
+                    "Metrics"
+                ],
+                "summary": "Overview metrics",
+                "operationId": "ec22308f6720672318ac8f6319d3c29c",
+                "parameters": [
+                    {
+                        "name": "start_at",
+                        "in": "query",
+                        "schema": {
+                            "type": "string",
+                            "format": "date-time"
+                        }
+                    },
+                    {
+                        "name": "end_at",
+                        "in": "query",
+                        "schema": {
+                            "type": "string",
+                            "format": "date-time"
+                        }
+                    },
+                    {
+                        "name": "domain",
+                        "in": "query",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    {
+                        "name": "whm_account",
+                        "in": "query",
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Overview"
+                                }
+                            }
+                        }
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
+        "/api/v1/metrics/mail/series": {
+            "get": {
+                "tags": [
+                    "Metrics"
+                ],
+                "summary": "Mail events time series",
+                "operationId": "ddb656c2e524e75f31f93322f407a213",
+                "parameters": [
+                    {
+                        "name": "start_at",
+                        "in": "query",
+                        "schema": {
+                            "type": "string",
+                            "format": "date-time"
+                        }
+                    },
+                    {
+                        "name": "end_at",
+                        "in": "query",
+                        "schema": {
+                            "type": "string",
+                            "format": "date-time"
+                        }
+                    },
+                    {
+                        "name": "interval",
+                        "in": "query",
+                        "schema": {
+                            "type": "string",
+                            "enum": [
+                                "hour",
+                                "day"
+                            ]
+                        }
+                    },
+                    {
+                        "name": "domain",
+                        "in": "query",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    {
+                        "name": "whm_account",
+                        "in": "query",
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "array",
+                                    "items": {
+                                        "$ref": "#/components/schemas/MetricSeries"
+                                    }
+                                }
+                            }
+                        }
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
+        "/api/v1/metrics/auth/series": {
+            "get": {
+                "tags": [
+                    "Metrics"
+                ],
+                "summary": "Auth events time series",
+                "operationId": "a3eb3eb843081a9470c2692d6beec641",
+                "parameters": [
+                    {
+                        "name": "start_at",
+                        "in": "query",
+                        "schema": {
+                            "type": "string",
+                            "format": "date-time"
+                        }
+                    },
+                    {
+                        "name": "end_at",
+                        "in": "query",
+                        "schema": {
+                            "type": "string",
+                            "format": "date-time"
+                        }
+                    },
+                    {
+                        "name": "interval",
+                        "in": "query",
+                        "schema": {
+                            "type": "string",
+                            "enum": [
+                                "hour",
+                                "day"
+                            ]
+                        }
+                    },
+                    {
+                        "name": "domain",
+                        "in": "query",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    {
+                        "name": "whm_account",
+                        "in": "query",
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "array",
+                                    "items": {
+                                        "$ref": "#/components/schemas/MetricSeries"
+                                    }
+                                }
+                            }
+                        }
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
+        "/api/v1/metrics/queue": {
+            "get": {
+                "tags": [
+                    "Metrics"
+                ],
+                "summary": "Queue depth metrics",
+                "operationId": "2333d739e535ecdc098b07a9aacae817",
+                "parameters": [
+                    {
+                        "name": "start_at",
+                        "in": "query",
+                        "schema": {
+                            "type": "string",
+                            "format": "date-time"
+                        }
+                    },
+                    {
+                        "name": "end_at",
+                        "in": "query",
+                        "schema": {
+                            "type": "string",
+                            "format": "date-time"
+                        }
+                    },
+                    {
+                        "name": "interval",
+                        "in": "query",
+                        "schema": {
+                            "type": "string",
+                            "enum": [
+                                "hour",
+                                "day"
+                            ]
+                        }
+                    },
+                    {
+                        "name": "domain",
+                        "in": "query",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    {
+                        "name": "whm_account",
+                        "in": "query",
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/QueueResponse"
+                                }
+                            }
+                        }
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        }
+    },
+    "components": {
+        "schemas": {
+            "HealthResponse": {
+                "properties": {
+                    "status": {
+                        "type": "string",
+                        "example": "ok"
+                    },
+                    "version": {
+                        "type": "string",
+                        "example": "1.0.0"
+                    },
+                    "time": {
+                        "type": "string",
+                        "format": "date-time"
+                    }
+                },
+                "type": "object"
+            },
+            "User": {
+                "properties": {
+                    "id": {
+                        "type": "integer",
+                        "example": 1
+                    },
+                    "name": {
+                        "type": "string",
+                        "example": "Admin"
+                    },
+                    "email": {
+                        "type": "string",
+                        "format": "email"
+                    },
+                    "created_at": {
+                        "type": "string",
+                        "format": "date-time"
+                    },
+                    "updated_at": {
+                        "type": "string",
+                        "format": "date-time"
+                    }
+                },
+                "type": "object"
+            },
+            "CpanelAccount": {
+                "properties": {
+                    "id": {
+                        "type": "integer",
+                        "example": 10
+                    },
+                    "whm_account": {
+                        "type": "string",
+                        "example": "rmlad479"
+                    },
+                    "domain": {
+                        "type": "string",
+                        "example": "rmladv.com.br"
+                    },
+                    "cpanel_host": {
+                        "type": "string",
+                        "example": "https://server:2087"
+                    }
+                },
+                "type": "object"
+            },
+            "AuthRegisterResponse": {
+                "properties": {
+                    "token": {
+                        "type": "string"
+                    },
+                    "user": {
+                        "$ref": "#/components/schemas/User"
+                    },
+                    "cpanel_account": {
+                        "$ref": "#/components/schemas/CpanelAccount"
+                    }
+                },
+                "type": "object"
+            },
+            "AuthLoginResponse": {
+                "properties": {
+                    "token": {
+                        "type": "string"
+                    },
+                    "user": {
+                        "$ref": "#/components/schemas/User"
+                    }
+                },
+                "type": "object"
+            },
+            "RegisterRequest": {
+                "required": [
+                    "name",
+                    "email",
+                    "password",
+                    "whm_account",
+                    "domain",
+                    "cpanel_host",
+                    "cpanel_api_token"
+                ],
+                "properties": {
+                    "name": {
+                        "type": "string"
+                    },
+                    "email": {
+                        "type": "string",
+                        "format": "email"
+                    },
+                    "password": {
+                        "type": "string",
+                        "format": "password"
+                    },
+                    "whm_account": {
+                        "type": "string"
+                    },
+                    "domain": {
+                        "type": "string"
+                    },
+                    "cpanel_host": {
+                        "type": "string"
+                    },
+                    "cpanel_api_token": {
+                        "type": "string"
+                    },
+                    "cpanel_username": {
+                        "type": "string"
+                    }
+                },
+                "type": "object"
+            },
+            "LoginRequest": {
+                "required": [
+                    "email",
+                    "password"
+                ],
+                "properties": {
+                    "email": {
+                        "type": "string",
+                        "format": "email"
+                    },
+                    "password": {
+                        "type": "string",
+                        "format": "password"
+                    }
+                },
+                "type": "object"
+            },
+            "IngestMailEvent": {
+                "required": [
+                    "occurred_at",
+                    "direction",
+                    "event_type"
+                ],
+                "properties": {
+                    "occurred_at": {
+                        "type": "string",
+                        "format": "date-time"
+                    },
+                    "direction": {
+                        "type": "string",
+                        "enum": [
+                            "inbound",
+                            "outbound",
+                            "local"
+                        ]
+                    },
+                    "event_type": {
+                        "type": "string"
+                    },
+                    "exim_message_id": {
+                        "type": "string"
+                    },
+                    "sender": {
+                        "type": "string"
+                    },
+                    "recipient": {
+                        "type": "string"
+                    },
+                    "domain": {
+                        "type": "string"
+                    },
+                    "whm_account": {
+                        "type": "string"
+                    },
+                    "ip": {
+                        "type": "string"
+                    },
+                    "remote_mta": {
+                        "type": "string"
+                    },
+                    "smtp_code": {
+                        "type": "string"
+                    },
+                    "smtp_response": {
+                        "type": "string"
+                    },
+                    "status": {
+                        "type": "string"
+                    },
+                    "error_category": {
+                        "type": "string"
+                    },
+                    "error_message": {
+                        "type": "string"
+                    },
+                    "meta": {
+                        "type": "object"
+                    }
+                },
+                "type": "object"
+            },
+            "IngestAuthEvent": {
+                "required": [
+                    "occurred_at",
+                    "proto",
+                    "event_type",
+                    "auth_result"
+                ],
+                "properties": {
+                    "occurred_at": {
+                        "type": "string",
+                        "format": "date-time"
+                    },
+                    "proto": {
+                        "type": "string",
+                        "enum": [
+                            "imap",
+                            "pop3",
+                            "smtp"
+                        ]
+                    },
+                    "event_type": {
+                        "type": "string"
+                    },
+                    "user_email": {
+                        "type": "string",
+                        "format": "email"
+                    },
+                    "domain": {
+                        "type": "string"
+                    },
+                    "whm_account": {
+                        "type": "string"
+                    },
+                    "ip": {
+                        "type": "string"
+                    },
+                    "auth_result": {
+                        "type": "string",
+                        "enum": [
+                            "success",
+                            "fail"
+                        ]
+                    },
+                    "failure_reason": {
+                        "type": "string"
+                    },
+                    "meta": {
+                        "type": "object"
+                    }
+                },
+                "type": "object"
+            },
+            "IngestEventsRequest": {
+                "required": [
+                    "source",
+                    "domain",
+                    "whm_account"
+                ],
+                "properties": {
+                    "source": {
+                        "type": "string"
+                    },
+                    "domain": {
+                        "type": "string"
+                    },
+                    "whm_account": {
+                        "type": "string"
+                    },
+                    "mail_events": {
+                        "type": "array",
+                        "items": {
+                            "$ref": "#/components/schemas/IngestMailEvent"
+                        }
+                    },
+                    "auth_events": {
+                        "type": "array",
+                        "items": {
+                            "$ref": "#/components/schemas/IngestAuthEvent"
+                        }
+                    }
+                },
+                "type": "object"
+            },
+            "IngestSummary": {
+                "properties": {
+                    "received": {
+                        "type": "integer"
+                    },
+                    "inserted": {
+                        "type": "integer"
+                    },
+                    "duplicates": {
+                        "type": "integer"
+                    },
+                    "invalid": {
+                        "type": "integer"
+                    }
+                },
+                "type": "object"
+            },
+            "IngestResult": {
+                "properties": {
+                    "source": {
+                        "type": "string"
+                    },
+                    "mail_events": {
+                        "$ref": "#/components/schemas/IngestSummary"
+                    },
+                    "auth_events": {
+                        "$ref": "#/components/schemas/IngestSummary"
+                    }
+                },
+                "type": "object"
+            },
+            "MailEvent": {
+                "properties": {
+                    "id": {
+                        "type": "integer"
+                    },
+                    "occurred_at": {
+                        "type": "string",
+                        "format": "date-time"
+                    },
+                    "direction": {
+                        "type": "string"
+                    },
+                    "event_type": {
+                        "type": "string"
+                    },
+                    "exim_message_id": {
+                        "type": "string"
+                    },
+                    "sender": {
+                        "type": "string"
+                    },
+                    "recipient": {
+                        "type": "string"
+                    },
+                    "domain": {
+                        "type": "string"
+                    },
+                    "whm_account": {
+                        "type": "string"
+                    },
+                    "ip": {
+                        "type": "string"
+                    },
+                    "remote_mta": {
+                        "type": "string"
+                    },
+                    "smtp_code": {
+                        "type": "string"
+                    },
+                    "smtp_response": {
+                        "type": "string"
+                    },
+                    "status": {
+                        "type": "string"
+                    },
+                    "error_category": {
+                        "type": "string"
+                    },
+                    "error_message": {
+                        "type": "string"
+                    },
+                    "meta": {
+                        "type": "object"
+                    },
+                    "created_at": {
+                        "type": "string",
+                        "format": "date-time"
+                    },
+                    "updated_at": {
+                        "type": "string",
+                        "format": "date-time"
+                    }
+                },
+                "type": "object"
+            },
+            "AuthEvent": {
+                "properties": {
+                    "id": {
+                        "type": "integer"
+                    },
+                    "occurred_at": {
+                        "type": "string",
+                        "format": "date-time"
+                    },
+                    "proto": {
+                        "type": "string"
+                    },
+                    "event_type": {
+                        "type": "string"
+                    },
+                    "user_email": {
+                        "type": "string"
+                    },
+                    "domain": {
+                        "type": "string"
+                    },
+                    "whm_account": {
+                        "type": "string"
+                    },
+                    "ip": {
+                        "type": "string"
+                    },
+                    "auth_result": {
+                        "type": "string"
+                    },
+                    "failure_reason": {
+                        "type": "string"
+                    },
+                    "meta": {
+                        "type": "object"
+                    },
+                    "created_at": {
+                        "type": "string",
+                        "format": "date-time"
+                    },
+                    "updated_at": {
+                        "type": "string",
+                        "format": "date-time"
+                    }
+                },
+                "type": "object"
+            },
+            "Mailbox": {
+                "properties": {
+                    "id": {
+                        "type": "integer"
+                    },
+                    "whm_account": {
+                        "type": "string"
+                    },
+                    "domain": {
+                        "type": "string"
+                    },
+                    "email": {
+                        "type": "string"
+                    },
+                    "is_active": {
+                        "type": "boolean"
+                    },
+                    "created_at": {
+                        "type": "string",
+                        "format": "date-time"
+                    },
+                    "updated_at": {
+                        "type": "string",
+                        "format": "date-time"
+                    }
+                },
+                "type": "object"
+            },
+            "MetricPoint": {
+                "properties": {
+                    "t": {
+                        "type": "string",
+                        "format": "date-time"
+                    },
+                    "value": {
+                        "type": "integer",
+                        "nullable": true
+                    }
+                },
+                "type": "object"
+            },
+            "MetricSeries": {
+                "properties": {
+                    "label": {
+                        "type": "string"
+                    },
+                    "points": {
+                        "type": "array",
+                        "items": {
+                            "$ref": "#/components/schemas/MetricPoint"
+                        }
+                    }
+                },
+                "type": "object"
+            },
+            "Overview": {
+                "properties": {
+                    "inbound_accepted": {
+                        "type": "integer"
+                    },
+                    "inbound_rejected": {
+                        "type": "integer"
+                    },
+                    "outbound_sent": {
+                        "type": "integer"
+                    },
+                    "outbound_deferred": {
+                        "type": "integer"
+                    },
+                    "outbound_bounced": {
+                        "type": "integer"
+                    },
+                    "login_success": {
+                        "type": "integer"
+                    },
+                    "login_failed": {
+                        "type": "integer"
+                    },
+                    "top_error_categories": {
+                        "type": "array",
+                        "items": {
+                            "properties": {
+                                "label": {
+                                    "type": "string"
+                                },
+                                "value": {
+                                    "type": "integer"
+                                }
+                            },
+                            "type": "object"
+                        }
+                    },
+                    "top_failure_reasons": {
+                        "type": "array",
+                        "items": {
+                            "properties": {
+                                "label": {
+                                    "type": "string"
+                                },
+                                "value": {
+                                    "type": "integer"
+                                }
+                            },
+                            "type": "object"
+                        }
+                    }
+                },
+                "type": "object"
+            },
+            "PaginatedMailEvents": {
+                "properties": {
+                    "data": {
+                        "type": "array",
+                        "items": {
+                            "$ref": "#/components/schemas/MailEvent"
+                        }
+                    },
+                    "meta": {
+                        "type": "object"
+                    },
+                    "links": {
+                        "type": "object"
+                    }
+                },
+                "type": "object"
+            },
+            "PaginatedAuthEvents": {
+                "properties": {
+                    "data": {
+                        "type": "array",
+                        "items": {
+                            "$ref": "#/components/schemas/AuthEvent"
+                        }
+                    },
+                    "meta": {
+                        "type": "object"
+                    },
+                    "links": {
+                        "type": "object"
+                    }
+                },
+                "type": "object"
+            },
+            "PaginatedMailboxes": {
+                "properties": {
+                    "data": {
+                        "type": "array",
+                        "items": {
+                            "$ref": "#/components/schemas/Mailbox"
+                        }
+                    },
+                    "meta": {
+                        "type": "object"
+                    },
+                    "links": {
+                        "type": "object"
+                    }
+                },
+                "type": "object"
+            },
+            "MailboxStoreRequest": {
+                "required": [
+                    "whm_account",
+                    "domain",
+                    "email"
+                ],
+                "properties": {
+                    "whm_account": {
+                        "type": "string"
+                    },
+                    "domain": {
+                        "type": "string"
+                    },
+                    "email": {
+                        "type": "string"
+                    },
+                    "is_active": {
+                        "type": "boolean"
+                    }
+                },
+                "type": "object"
+            },
+            "MailboxUpdateRequest": {
+                "properties": {
+                    "whm_account": {
+                        "type": "string"
+                    },
+                    "domain": {
+                        "type": "string"
+                    },
+                    "email": {
+                        "type": "string"
+                    },
+                    "is_active": {
+                        "type": "boolean"
+                    }
+                },
+                "type": "object"
+            },
+            "QueueResponse": {
+                "properties": {
+                    "last_queue_depth": {
+                        "type": "integer",
+                        "nullable": true
+                    },
+                    "series": {
+                        "type": "array",
+                        "items": {
+                            "$ref": "#/components/schemas/MetricSeries"
+                        }
+                    }
+                },
+                "type": "object"
+            },
+            "ErrorResponse": {
+                "properties": {
+                    "message": {
+                        "type": "string"
+                    }
+                },
+                "type": "object"
+            },
+            "ValidationError": {
+                "properties": {
+                    "message": {
+                        "type": "string"
+                    },
+                    "errors": {
+                        "type": "object"
+                    }
+                },
+                "type": "object"
+            }
+        },
+        "securitySchemes": {
+            "bearerAuth": {
+                "type": "http",
+                "scheme": "bearer",
+                "bearerFormat": "Token",
+                "description": "Informe o token Bearer retornado pela API."
+            }
+        }
+    },
+    "tags": [
+        {
+            "name": "Health",
+            "description": "Health checks"
+        },
+        {
+            "name": "Auth",
+            "description": "Authentication"
+        },
+        {
+            "name": "Ingest",
+            "description": "Ingest events"
+        },
+        {
+            "name": "Mail Events",
+            "description": "Mail events"
+        },
+        {
+            "name": "Auth Events",
+            "description": "Auth events"
+        },
+        {
+            "name": "Metrics",
+            "description": "Aggregated metrics"
+        },
+        {
+            "name": "Mailboxes",
+            "description": "Mailboxes"
+        }
+    ],
+    "security": [
+        {
+            "bearerAuth": []
+        }
+    ]
+}

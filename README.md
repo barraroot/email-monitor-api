@@ -61,6 +61,14 @@ vendor/bin/sail artisan migrate
 
 > Em ambientes não locais, habilite `SWAGGER_ENABLED=true` para acessar a documentação.
 
+Gerar/atualizar o spec:
+
+```bash
+vendor/bin/sail artisan l5-swagger:generate
+```
+
+Opcionalmente, defina `L5_SWAGGER_GENERATE_ALWAYS=true` no `.env` para gerar automaticamente.
+
 ## Fluxo de cadastro via cPanel
 
 1. O frontend chama `POST /api/v1/auth/register` com nome, e-mail, senha, domínio, WHM account, host do cPanel e token.

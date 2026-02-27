@@ -13,9 +13,32 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Validation\ValidationException;
+use OpenApi\Attributes as OA;
 
 class AuthController extends Controller
 {
+    #[OA\Post(
+        path: '/api/v1/auth/register',
+        tags: ['Auth'],
+        summary: 'Register a new user',
+        security: [],
+        requestBody: new OA\RequestBody(
+            required: true,
+            content: new OA\JsonContent(ref: '#/components/schemas/RegisterRequest')
+        ),
+        responses: [
+            new OA\Response(
+                response: 201,
+                description: 'Created',
+                content: new OA\JsonContent(ref: '#/components/schemas/AuthRegisterResponse')
+            ),
+            new OA\Response(
+                response: 422,
+                description: 'Validation error',
+                content: new OA\JsonContent(ref: '#/components/schemas/ValidationError')
+            ),
+        ]
+    )]
     public function register(RegisterRequest $request, CpanelAccountService $cpanelAccountService): JsonResponse
     {
         $data = $request->validated();
@@ -44,6 +67,28 @@ class AuthController extends Controller
         });
     }
 
+    #[OA\Post(
+        path: '/api/v1/auth/token',
+        tags: ['Auth'],
+        summary: 'Login and issue token',
+        security: [],
+        requestBody: new OA\RequestBody(
+            required: true,
+            content: new OA\JsonContent(ref: '#/components/schemas/LoginRequest')
+        ),
+        responses: [
+            new OA\Response(
+                response: 200,
+                description: 'OK',
+                content: new OA\JsonContent(ref: '#/components/schemas/AuthLoginResponse')
+            ),
+            new OA\Response(
+                response: 422,
+                description: 'Validation error',
+                content: new OA\JsonContent(ref: '#/components/schemas/ValidationError')
+            ),
+        ]
+    )]
     public function token(LoginRequest $request): JsonResponse
     {
         $data = $request->validated();
@@ -64,6 +109,23 @@ class AuthController extends Controller
         ]);
     }
 
+    #[OA\Post(
+        path: '/api/v1/auth/logout',
+        tags: ['Auth'],
+        summary: 'Revoke current token',
+        security: [['bearerAuth' => []]],
+        responses: [
+            new OA\Response(
+                response: 204,
+                description: 'No content'
+            ),
+            new OA\Response(
+                response: 401,
+                description: 'Unauthorized',
+                content: new OA\JsonContent(ref: '#/components/schemas/ErrorResponse')
+            ),
+        ]
+    )]
     public function logout(Request $request): JsonResponse
     {
         $request->user()?->currentAccessToken()?->delete();
