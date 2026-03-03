@@ -16,6 +16,7 @@ class IngestClient extends Model
         'name',
         'shared_secret_hash',
         'is_active',
+        'last_seen_at',
     ];
 
     /**
@@ -25,6 +26,7 @@ class IngestClient extends Model
     {
         return [
             'is_active' => 'boolean',
+            'last_seen_at' => 'datetime',
         ];
     }
 }

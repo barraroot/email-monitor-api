@@ -11,6 +11,10 @@ class DatabaseSeeder extends Seeder
      */
     public function run(): void
     {
-        $this->call(EmailMonitorSeeder::class);
+        $this->call([
+            RolesAndPermissionsSeeder::class,
+            AdminUserSeeder::class,
+            //EmailMonitorSeeder::class,
+        ]);
     }
 }

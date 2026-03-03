@@ -69,6 +69,82 @@ vendor/bin/sail artisan l5-swagger:generate
 
 Opcionalmente, defina `L5_SWAGGER_GENERATE_ALWAYS=true` no `.env` para gerar automaticamente.
 
+## Painel Admin (FilamentPHP v5)
+
+### Instalação do Painel
+
+As dependências já estão incluídas no `composer.json`. Após instalar, execute:
+
+```bash
+# Migrations (cria tabelas de roles/permissions e last_seen_at nos ingest_clients)
+vendor/bin/sail artisan migrate
+
+# Seeders (roles, permissions e usuário admin padrão)
+vendor/bin/sail artisan db:seed --class=RolesAndPermissionsSeeder
+vendor/bin/sail artisan db:seed --class=AdminUserSeeder
+
+# Compilar assets do Filament
+vendor/bin/sail npm install
+vendor/bin/sail npm run build
+```
+
+### Variáveis de ambiente do admin
+
+```env
+ADMIN_EMAIL=admin@mailmonitor.local
+ADMIN_PASSWORD=password
+ADMIN_NAME=Administrador
+```
+
+### Acesso
+
+Acesse `/admin` no navegador. Credenciais padrão:
+
+- **E-mail**: `admin@mailmonitor.local` (ou valor de `ADMIN_EMAIL`)
+- **Senha**: `password` (ou valor de `ADMIN_PASSWORD`)
+
+> Troque a senha após o primeiro acesso.
+
+### Roles e Permissões
+
+| Role | Permissões |
+|------|-----------|
+| `admin` | Tudo — resources, usuários, métricas |
+| `operator` | viewer + gerenciar Mailboxes, cPanel Accounts, Ingest Clients |
+| `viewer` | Apenas leitura — Mail Events, Auth Events, métricas |
+
+Para criar novos usuários com roles, acesse **Administração → Usuários** no painel.
+
+### Estrutura do Painel
+
+| Grupo | Resource | Roles com acesso |
+|-------|----------|-----------------|
+| Monitoramento | Mail Events | viewer, operator, admin |
+| Monitoramento | Auth Events | viewer, operator, admin |
+| Configuração | Mailboxes | operator, admin |
+| Configuração | Contas cPanel | operator, admin |
+| Configuração | Clientes Ingest | operator, admin |
+| Administração | Usuários | admin |
+
+### Actions especiais
+
+- **Testar Credenciais** (Contas cPanel): valida o token cPanel atual e atualiza `token_last_verified_at`.
+- **Sincronizar Mailboxes** (Contas cPanel): importa mailboxes do cPanel para a tabela `mailboxes`.
+- **Gerar Novo Segredo** (Clientes Ingest): gera um novo `shared_secret` e exibe **apenas uma vez** via notificação.
+
+### Comandos artisan usados
+
+```bash
+vendor/bin/sail composer require filament/filament:"^5.0" spatie/laravel-permission
+vendor/bin/sail artisan vendor:publish --provider="Spatie\Permission\PermissionServiceProvider"
+vendor/bin/sail artisan filament:install --scaffold
+vendor/bin/sail artisan migrate
+vendor/bin/sail artisan db:seed --class=RolesAndPermissionsSeeder
+vendor/bin/sail artisan db:seed --class=AdminUserSeeder
+```
+
+---
+
 ## Fluxo de cadastro via cPanel
 
 1. O frontend chama `POST /api/v1/auth/register` com nome, e-mail, senha, domínio, WHM account, host do cPanel e token.
