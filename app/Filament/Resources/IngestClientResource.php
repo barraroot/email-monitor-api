@@ -17,6 +17,7 @@ use Filament\Tables\Columns\IconColumn;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Filters\TernaryFilter;
 use Filament\Tables\Table;
+use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Str;
 
 class IngestClientResource extends Resource
@@ -97,6 +98,7 @@ class IngestClientResource extends Resource
                     ->modalDescription('O segredo atual será invalidado. Copie o novo segredo — ele não será exibido novamente.')
                     ->action(function (IngestClient $record): void {
                         $secret = Str::random(64);
+                        Log::info($secret);
                         $record->update(['shared_secret_hash' => hash('sha256', $secret)]);
 
                         Notification::make()
