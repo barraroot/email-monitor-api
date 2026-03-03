@@ -4,7 +4,6 @@ namespace App\Http\Requests\Api\V1;
 
 use App\Models\IngestClient;
 use Illuminate\Foundation\Http\FormRequest;
-use Illuminate\Support\Facades\Hash;
 use Illuminate\Validation\Validator;
 
 class IngestEventsRequest extends FormRequest
@@ -29,7 +28,7 @@ class IngestEventsRequest extends FormRequest
             ->where('is_active', true)
             ->get()
             ->contains(function (IngestClient $client) use ($secret): bool {
-                return Hash::check($secret, $client->shared_secret_hash);
+                return hash_equals($client->shared_secret_hash, hash('sha256', $secret));
             });
     }
 
