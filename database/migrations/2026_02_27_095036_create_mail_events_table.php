@@ -33,7 +33,7 @@ return new class extends Migration
             $table->timestamps();
         });
 
-        DB::statement('CREATE UNIQUE INDEX mail_events_dedupe_unique ON mail_events (exim_message_id, event_type, occurred_at, recipient) WHERE exim_message_id IS NOT NULL');
+        DB::statement('CREATE UNIQUE INDEX mail_events_dedupe_unique ON mail_events (exim_message_id, event_type, occurred_at, recipient)');
     }
 
     /**
@@ -41,7 +41,7 @@ return new class extends Migration
      */
     public function down(): void
     {
-        DB::statement('DROP INDEX IF EXISTS mail_events_dedupe_unique');
+        DB::statement('DROP INDEX mail_events_dedupe_unique ON mail_events');
         Schema::dropIfExists('mail_events');
     }
 };

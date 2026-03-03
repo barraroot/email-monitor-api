@@ -1,0 +1,40 @@
+name: CD
+
+on:
+  push:
+    branches: [main]
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Iniciando o deploy
+        uses: appleboy/ssh-action@master
+        env:
+          COMPOSER_MEMORY_LIMIT: -1
+          COMPOSER_ALLOW_SUPERUSER: 1
+        with:
+          host: ${{ secrets.SERVER_HOST }}
+          username: root
+          password: ${{ secrets.SSH_PASSWORD }}
+          sync: true
+          port: 22
+          script: |
+            echo "Iniciando o deploy"
+            cd /var/www/html/transmassa-web
+            git config --global --add safe.directory /var/www/html/email-monitor-api
+            git reset --hard
+            git pull origin main
+            composer install
+            composer dumpautoload
+            supervisorctl stop all
+            echo "Executando migrates!"
+            php artisan migrate --force
+            npm install
+            npm run build
+            php artisan filament:optimize-clear
+            php artisan optimize
+            php artisan icons:cache
+            cd ..
+            chown -R www-data:www-data email-monitor-api/ ; chown -R www-data:www-data email-monitor-api/storage/ ; chown -R www-data:www-data email-monitor-api/storage/logs/ ; chown -R www-data:www-data email-monitor-api/public/ ; chmod -R 0777 email-monitor-api/ ; chmod -R 0777 email-monitor-api/storage/ ; chmod -R 0777 email-monitor-api/storage/logs/ ; chmod -R 0777 email-monitor-api/public/
+            supervisorctl start all
