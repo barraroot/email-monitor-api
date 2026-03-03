@@ -40,7 +40,7 @@ class MailEventsChartWidget extends ChartWidget
         $rows = MailEvent::query()
             ->whereIn('event_type', array_keys($eventTypes))
             ->whereBetween('occurred_at', [$start, $end])
-            ->selectRaw("date_trunc('hour', occurred_at) as bucket, event_type, count(*) as total")
+            ->selectRaw("DATE_FORMAT(occurred_at, '%Y-%m-%d %H:00:00') as bucket, event_type, count(*) as total")
             ->groupBy('bucket', 'event_type')
             ->orderBy('bucket')
             ->get();

@@ -85,8 +85,10 @@ class MetricsService
         $query = MailEvent::query()->whereIn('event_type', array_values(self::MAIL_EVENT_MAP));
         $this->applyCommonFilters($query, $filters);
 
+        $bucketExpr = $this->dateTruncExpr($interval, 'occurred_at');
+
         $rows = $query
-            ->selectRaw("date_trunc('{$interval}', occurred_at) as bucket, event_type, count(*) as total")
+            ->selectRaw("{$bucketExpr} as bucket, event_type, count(*) as total")
             ->groupBy('bucket', 'event_type')
             ->orderBy('bucket')
             ->get();
@@ -123,8 +125,10 @@ class MetricsService
         $query = AuthEvent::query()->whereIn('event_type', ['login_success', 'login_failed']);
         $this->applyCommonFilters($query, $filters);
 
+        $bucketExpr = $this->dateTruncExpr($interval, 'occurred_at');
+
         $rows = $query
-            ->selectRaw("date_trunc('{$interval}', occurred_at) as bucket, event_type, proto, count(*) as total")
+            ->selectRaw("{$bucketExpr} as bucket, event_type, proto, count(*) as total")
             ->groupBy('bucket', 'event_type', 'proto')
             ->orderBy('bucket')
             ->get();
@@ -170,8 +174,10 @@ class MetricsService
             ->selectRaw("{$valueExpression} as value")
             ->value('value');
 
+        $bucketExpr = $this->dateTruncExpr($interval, 'occurred_at');
+
         $rows = $query
-            ->selectRaw("date_trunc('{$interval}', occurred_at) as bucket, max({$valueExpression}) as value")
+            ->selectRaw("{$bucketExpr} as bucket, max({$valueExpression}) as value")
             ->groupBy('bucket')
             ->orderBy('bucket')
             ->get();
@@ -214,8 +220,20 @@ class MetricsService
         }
     }
 
+    private function dateTruncExpr(string $interval, string $column): string
+    {
+        return match ($interval) {
+            'day' => "DATE_FORMAT({$column}, '%Y-%m-%d 00:00:00')",
+            default => "DATE_FORMAT({$column}, '%Y-%m-%d %H:00:00')",
+        };
+    }
+
     private function queueValueExpression(): string
     {
-        return "COALESCE(NULLIF(meta->>'queue_depth', '')::int, NULLIF(meta->>'depth', '')::int, NULLIF(meta->>'value', '')::int)";
+        return "COALESCE(
+            CAST(NULLIF(JSON_UNQUOTE(JSON_EXTRACT(meta, '$.queue_depth')), '') AS SIGNED),
+            CAST(NULLIF(JSON_UNQUOTE(JSON_EXTRACT(meta, '$.depth')), '') AS SIGNED),
+            CAST(NULLIF(JSON_UNQUOTE(JSON_EXTRACT(meta, '$.value')), '') AS SIGNED)
+        )";
     }
 }

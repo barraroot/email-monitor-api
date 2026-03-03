@@ -37,7 +37,11 @@ class StatsOverviewWidget extends BaseWidget
 
     private function queueDepth(): ?int
     {
-        $expr = "COALESCE(NULLIF(meta->>'queue_depth', '')::int, NULLIF(meta->>'depth', '')::int, NULLIF(meta->>'value', '')::int)";
+        $expr = "COALESCE(
+            CAST(NULLIF(JSON_UNQUOTE(JSON_EXTRACT(meta, '$.queue_depth')), '') AS SIGNED),
+            CAST(NULLIF(JSON_UNQUOTE(JSON_EXTRACT(meta, '$.depth')), '') AS SIGNED),
+            CAST(NULLIF(JSON_UNQUOTE(JSON_EXTRACT(meta, '$.value')), '') AS SIGNED)
+        )";
 
         return MailEvent::query()
             ->where('event_type', 'queue_depth')

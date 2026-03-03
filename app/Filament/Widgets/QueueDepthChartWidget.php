@@ -21,12 +21,16 @@ class QueueDepthChartWidget extends ChartWidget
         $start = now()->subHours(24)->startOfHour();
         $end = now()->endOfHour();
 
-        $valueExpr = "COALESCE(NULLIF(meta->>'queue_depth', '')::int, NULLIF(meta->>'depth', '')::int, NULLIF(meta->>'value', '')::int)";
+        $valueExpr = "COALESCE(
+            CAST(NULLIF(JSON_UNQUOTE(JSON_EXTRACT(meta, '$.queue_depth')), '') AS SIGNED),
+            CAST(NULLIF(JSON_UNQUOTE(JSON_EXTRACT(meta, '$.depth')), '') AS SIGNED),
+            CAST(NULLIF(JSON_UNQUOTE(JSON_EXTRACT(meta, '$.value')), '') AS SIGNED)
+        )";
 
         $rows = MailEvent::query()
             ->where('event_type', 'queue_depth')
             ->whereBetween('occurred_at', [$start, $end])
-            ->selectRaw("date_trunc('hour', occurred_at) as bucket, max({$valueExpr}) as value")
+            ->selectRaw("DATE_FORMAT(occurred_at, '%Y-%m-%d %H:00:00') as bucket, max({$valueExpr}) as value")
             ->groupBy('bucket')
             ->orderBy('bucket')
             ->get();
