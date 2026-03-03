@@ -18,7 +18,7 @@ Route::prefix('v1')->group(function (): void {
         Route::post('/logout', [AuthController::class, 'logout'])->middleware('auth:sanctum');
     });
 
-    Route::post('/ingest/events', [IngestController::class, 'store'])->middleware('throttle:ingest');
+    Route::post('/ingest/events', [IngestController::class, 'store']);//->middleware('throttle:ingest');
 
     Route::middleware(['auth:sanctum', 'throttle:api'])->group(function (): void {
         Route::get('/mail/events', [MailEventController::class, 'index']);
